@@ -79,7 +79,7 @@ print('    잘리지 않은 진동만:'); print(done['지속(샘플)'].describe(
 
 # ================= C. 윈도 길이별 데이터 손실 =================
 rows = []
-for W in [8, 10, 12, 16, 17, 20, 24, 30]:
+for W in range(8,31):
     r = {'윈도 길이': W}
     for name, df in [('정상', normal), ('이상', outlier)]:
         L = df.groupby('Segment').size()
@@ -98,7 +98,7 @@ print('[C] 윈도 길이별 데이터 손실'); print(loss.to_string(index=False
 # 주기가 P인 사인파를 시작 위치를 200가지로 바꿔가며 자르고, 표준편차가 얼마나 흔들리는지 측정
 rows = []
 for P in [16, 16.5, 17]:                       # A의 추정 범위(16~17)를 모두 확인
-    for W in [8, 10, 12, 16, 17, 20, 24, 30]:
+    for W in range(8,31):
         stds = [np.std(np.sin(2 * np.pi * (np.arange(W) + ph) / P))
                 for ph in np.linspace(0, P, 200, endpoint=False)]
         rows.append({'가정 주기': P, '윈도 길이': W, '주기 대비 길이': round(W / P, 2),
@@ -113,3 +113,16 @@ print(phase.pivot(index='윈도 길이', columns='가정 주기', values='흔들
 for name, df in [('정상', normal), ('이상', outlier)]:
     L = df.groupby('Segment').size()
     print(f'[E] {name}: 전체 {len(L)}개 구간 중 길이가 정확히 50인 구간 {(L == 50).sum()}개, 최대 길이 {L.max()}')
+
+    # ================= F. 조건 종합 =================
+flick = phase.groupby('윈도 길이')['흔들림(%)'].max().rename('최대 흔들림(%)')
+summ = loss.set_index('윈도 길이').join(flick)
+summ['① 흔들림<10%'] = summ['최대 흔들림(%)'] < 10
+summ['② 9샘플 이상'] = summ.index >= 9
+summ['③ 이상 구간≥10'] = summ['이상 사용 구간'] >= 10
+summ['모두 만족'] = summ[['① 흔들림<10%', '② 9샘플 이상', '③ 이상 구간≥10']].all(axis=1)
+cols = ['최대 흔들림(%)', '이상 사용 구간', '정상 윈도 수', '이상 윈도 수',
+        '정상 실제 미사용(%)', '이상 실제 미사용(%)', '모두 만족']
+summ[cols].to_csv('table04e_조건종합.csv', encoding='utf-8-sig')
+print('\n[F] 조건 종합')    
+print(summ[cols].to_string())
