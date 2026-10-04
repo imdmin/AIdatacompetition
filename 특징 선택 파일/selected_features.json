@@ -1,0 +1,35 @@
+{
+  "F1": [
+    "AI2_kurt",
+    "AI2_period8",
+    "ratio_AI1_AI2",
+    "ratio_AI0_AI2",
+    "AI0_rms",
+    "AI1_rms",
+    "AI2_rms"
+  ],
+  "F2": [
+    "ratio_AI1_AI2",
+    "ratio_AI0_AI2",
+    "AI0_rms",
+    "AI1_rms",
+    "AI2_rms"
+  ],
+  "규칙": {
+    "AUC 기준": 0.7,
+    "중복 기준": 0.9,
+    "항상 유지": [
+      "AI0_rms",
+      "AI1_rms",
+      "AI2_rms"
+    ],
+    "F2 제외 특징": [
+      "AI2_period8",
+      "AI2_kurt",
+      "AI2_crest",
+      "AI2_skew",
+      "AI2_mean"
+    ],
+    "사용 데이터": "학습+검증"
+  }
+}
